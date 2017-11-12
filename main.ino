@@ -1,6 +1,6 @@
-/*
-
-
+/*           __  ____       __
+        |   |__|   |  |__| |__
+        |__ |  |   |  |  | |__
 */
 //............Global Variables
 int flag=0;
@@ -178,11 +178,19 @@ void straight(int start, int finish)
 {
     tool(1);
     dia=array[start];
-    for(i=maxDia;i>dia;i--)
+
+    /*
+              ___________dia
+             |           |
+             |           |
+             |           |maxDia
+           finish      start
+    */
+    for(i=maxDia+1;i>=dia;i--)//starting from maxDia+1 just to ensure safety
     {
-        writePos(i-1,start);
-        writePos(i-1,finish);
-        writePos(i-1,start);
+        writePos(i,start);
+        writePos(i,finish);
+        writePos(i,start);
     }
 }
 
@@ -202,11 +210,11 @@ void forwardTaper(int start, int finish)
                /finishDia
     */
 
-    for(i=startDia;i<=finishDia;i++)
+    for(i=finishDia;i>=startDia;i--)
     {
-        wirtePos(i-1,start)
-        writePos(i-1,finish)
-        writePos(i-1,start)
+        wirtePos(i,start);
+        writePos(i,finish);
+        writePos(i,start);
         finish=finish-yInc;
     }
 }
@@ -215,12 +223,24 @@ void forwardTaper(int start, int finish)
 void backwardTaper(int start, int finish)
 {
     tool(3);
+    startDia=array[start];
+    finishDia=array[finish];
+    yInc=1*(finish-start)/(startDia-finishDia);
+    
     /*         finishDia\
                          \
                           \
                            \
                     startDia\
     */
+
+    for(i=startDia;i>=finishDia;i--)
+    {
+        writePos(i,finish);
+        writePos(i,start);//here the position of start will change
+        writePos(i,finish);
+        start=start-yInc;
+    }
 }
 
 //tool change
