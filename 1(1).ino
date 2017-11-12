@@ -1,10 +1,14 @@
+/*
+
+
+*/
 //............Global Variables
 int flag=0;
 float array[];
 float tapperdownarray[]={200};
 int xPosCurrent,yPosCurrent;
-int maxLength,maxDia;
-int stockLength=maxLength+50,stockDia;
+int maxLength,maxDia;//these are work piece dimensions
+int stockLength=maxLength+50,stockDia;//these are stock dimensions
 
 //............Initialization
 #include <LiquidCrystal.h>//Display
@@ -47,22 +51,22 @@ float dist()
     unsigned long pulse_width;
     float mm;
     //float inches;
-  
+
     // Hold the trigger pin high for at least 10 us
     digitalWrite(TRIG_PIN, HIGH);
     delayMicroseconds(10);
     digitalWrite(TRIG_PIN, LOW);
-  
+
     // Wait for pulse on echo pin
     while ( digitalRead(ECHO_PIN) == 0 );
-  
+
     // Measure how long the echo pin was held high (pulse width)
     // Note: the micros() counter will overflow after ~70 min
     t1 = micros();
     while ( digitalRead(ECHO_PIN) == 1);
     t2 = micros();
     pulse_width = t2 - t1;
-  
+
     // Calculate distance in centimeters and inches. The constants
     // are found in the datasheet, and calculated from the assumed speed
     //of sound in air at sea level (~340 m/s).
@@ -157,19 +161,22 @@ void cut()
 
     if(flag==1)//this is for tapering
     {
-        writePos(maxDia+1,-1);//facing
+        writePos(stockDia+1,-1);//facing
         for(i=0;i<=20;i++)//i is y position
         {
-            writePos(maxDia+1,i);
+            writePos(stockDia+1,i);
             writePos(0,i);
-            writePos(maxDia+1,i);
+            writePos(stockDia+1,i);
         }//facing ends
+        for(i=0;i>=)//turning
+        //here according to the shape the next 3 functions are called
     }
 }
 
 //straight cut
 void straight(int start, int finish)
 {
+    tool(1);
     dia=array[start];
     for(i=maxDia;i>dia;i--)
     {
@@ -182,11 +189,62 @@ void straight(int start, int finish)
 //forward taper
 void forwardTaper(int start, int finish)
 {
+    tool(2);
+    startDia=array[start];
+    finishDia=array[finish];
 
+    yInc=1*(finish-start)/(finishDia-startDia);//angle of taper
+    /*this formula tell the myStepperY where to stop if it is at a particular diameter
+                   /startDia
+                  /               1 will be the incremental distance of the diameters
+                 /                yInc will be that of start to finish
+                /
+               /finishDia
+    */
+
+    for(i=startDia;i<=finishDia;i++)
+    {
+        wirtePos(i-1,start)
+        writePos(i-1,finish)
+        writePos(i-1,start)
+        finish=finish-yInc;
+    }
 }
 
 //backward taper
 void backwardTaper(int start, int finish)
 {
+    tool(3);
+    /*         finishDia\
+                         \
+                          \
+                           \
+                    startDia\
+    */
+}
 
+//tool change
+void tool(number)
+{
+    switch (number)
+    {
+        case 1://V-Tool
+        display("insert V-tool and fix properly");
+        display("change to the diffent fixed position");
+        xPosCurrent=xPosCurrent-valeX;//here the current position is changed
+        yPosCurrent=yPosCurrent-valeY;//due to the change in orientation of the tool
+        break;
+        case 2://parting Tool for forwardTaper
+        display("insert parting tool and fix properly");
+        display("change to the diffent fixed position");
+        xPosCurrent=xPosCurrent+valeX;//here the current position is changed
+        yPosCurrent=yPosCurrent+valeY;//due to the change in orientation of the tool
+        break;
+        case 3://parting Tool for backwardTaper
+        display("insert parting tool and fix properly");
+        display("change to the diffent fixed position");
+        xPosCurrent=xPosCurrent+valeX;//here the current position is changed
+        yPosCurrent=yPosCurrent+valeY;//due to the change in orientation of the tool
+        break;
+    }
 }
